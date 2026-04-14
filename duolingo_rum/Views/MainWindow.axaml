@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:duolingo_rum"
+        xmlns:vm="using:duolingo_rum.ViewModels"
+        x:Class="duolingo_rum.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="LinguaAI"
+        Width="800" Height="600">
+
+    <Window.DataTemplates>
+        <local:ViewLocator/>
+    </Window.DataTemplates>
+
+    <ContentControl Content="{Binding CurrentView}"/>
+
+</Window>

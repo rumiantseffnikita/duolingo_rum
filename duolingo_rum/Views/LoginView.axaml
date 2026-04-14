@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:duolingo_rum.ViewModels"
+             x:DataType="vm:LoginViewModel"
+             x:Class="duolingo_rum.Views.LoginView">
+
+    <StackPanel Spacing="10" Width="300" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+        <TextBlock Text="Авторизация" FontSize="20" HorizontalAlignment="Center"/>
+
+        <TextBox Watermark="Имя" Text="{Binding Name}"/>
+        <TextBox Watermark="Email" Text="{Binding Email}"/>
+        <TextBox Watermark="Пароль" Text="{Binding Password}"/>
+
+        <Button Content="Войти" Command="{Binding LoginCommand}"/>
+        <Button Content="Зарегистрироваться" Command="{Binding RegisterCommand}"/>
+
+        <TextBlock Text="{Binding Status}" Foreground="Red"/>
+
+    </StackPanel>
+
+</UserControl>

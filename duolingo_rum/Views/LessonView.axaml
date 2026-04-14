@@ -1,0 +1,82 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:duolingo_rum.ViewModels"
+             xmlns:conv="using:duolingo_rum.Converters"
+             x:Class="duolingo_rum.Views.LessonView"
+             x:DataType="vm:LessonViewModel">
+
+    <UserControl.Resources>
+        <conv:InvertBooleanConverter x:Key="InvertConverter"/>
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="20">
+        
+        <!-- Заголовок и прогресс -->
+        <StackPanel Grid.Row="0" Spacing="10">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0" Text="📚 Урок" FontSize="24"/>
+                <TextBlock Grid.Column="1" Text="{Binding Score}" FontSize="24" Foreground="Green"/>
+            </Grid>
+            <ProgressBar Value="{Binding Score}" Maximum="{Binding Total}" Height="10"/>
+        </StackPanel>
+        
+        <!-- Карточка с вопросом -->
+        <Border Grid.Row="1" Background="#F0F0F0" CornerRadius="10" Padding="20" Margin="0,20">
+            <StackPanel Spacing="15" HorizontalAlignment="Center">
+                
+                <!-- Слово для перевода -->
+                <TextBlock Text="Как переводится?" FontSize="14" Foreground="Gray" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding CurrentWord.Word1}" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
+                
+                <!-- Поле ввода (видно только до ответа) -->
+                <TextBox Text="{Binding UserAnswer}" 
+                         Watermark="Введите перевод..."
+                         IsVisible="{Binding ShowFeedback, Converter={StaticResource InvertConverter}}"
+                         Width="300"
+                         HorizontalAlignment="Center"/>
+                
+                <!-- Кнопка Проверить (видна только до ответа) -->
+                <Button Content="✓ Проверить" 
+                        Command="{Binding CheckAnswerCommand}"
+                        IsVisible="{Binding ShowFeedback, Converter={StaticResource InvertConverter}}"
+                        Width="200"
+                        HorizontalAlignment="Center"/>
+                
+                <!-- Индикатор загрузки -->
+                <TextBlock Text="🤖 AI анализирует..." 
+                           IsVisible="{Binding IsLoading}"
+                           Foreground="Gray"
+                           HorizontalAlignment="Center"/>
+                
+                <!-- AI Фидбек (виден после ответа) -->
+                <Border IsVisible="{Binding ShowFeedback}" 
+                        Background="#E3F2FD" CornerRadius="8" Padding="15">
+                    <TextBlock Text="{Binding Feedback}" 
+                               TextWrapping="Wrap" 
+                               Foreground="#1565C0"
+                               MaxWidth="400"/>
+                </Border>
+                
+                <!-- Кнопки навигации (видны после ответа) -->
+                <StackPanel Orientation="Horizontal" Spacing="15" 
+                            IsVisible="{Binding ShowFeedback}"
+                            HorizontalAlignment="Center">
+                    
+                    <!-- Кнопка Далее (если не последнее слово) -->
+                    <Button Content="➡ Далее" 
+                            Command="{Binding NextWordCommand}"
+                            IsVisible="{Binding IsLastWord, Converter={StaticResource InvertConverter}}"
+                            Width="150"/>
+                    
+                    <!-- Кнопка Завершить (если последнее слово) -->
+                    <Button Content="🏁 Завершить урок" 
+                            Command="{Binding EndLessonCommand}"
+                            IsVisible="{Binding IsLastWord}"
+                            Width="150"/>
+                </StackPanel>
+                
+            </StackPanel>
+        </Border>
+        
+    </Grid>
+</UserControl>
