@@ -1,10 +1,10 @@
-﻿// ViewModels/LessonViewModel.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using duolingo_rum.Models;
 using duolingo_rum.Services;
 using ReactiveUI;
@@ -39,7 +39,6 @@ namespace duolingo_rum.ViewModels
             NextWordCommand = ReactiveCommand.Create(NextWord);
             EndLessonCommand = ReactiveCommand.Create(EndLesson);
 
-            // Загружаем слова
             Task.Run(async () => await LoadWords());
         }
 
@@ -85,7 +84,6 @@ namespace duolingo_rum.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isLoading, value);
         }
 
-        // Свойства для управления кнопками
         public bool IsAnswered => ShowFeedback;
         public bool IsLastWord => _currentWordIndex >= (_words?.Count ?? 0) - 1;
 
@@ -102,14 +100,10 @@ namespace duolingo_rum.ViewModels
                 _words = await _wordService.GetWordsForLesson(_user.Id);
 
                 if (_words == null || _words.Count == 0)
-                {
                     _words = await _wordService.GetAnyWords(5);
-                }
 
                 if (_words == null || _words.Count == 0)
-                {
                     _words = CreateTestWords();
-                }
 
                 _currentWordIndex = 0;
                 Total = _words.Count;
@@ -148,7 +142,7 @@ namespace duolingo_rum.ViewModels
                 CurrentWord = _words[_currentWordIndex];
                 UserAnswer = string.Empty;
                 Feedback = string.Empty;
-                ShowFeedback = false; // Скрываем фидбек, показываем поле ввода
+                ShowFeedback = false;
                 this.RaisePropertyChanged(nameof(IsAnswered));
                 this.RaisePropertyChanged(nameof(IsLastWord));
             }
@@ -187,17 +181,19 @@ namespace duolingo_rum.ViewModels
                     Feedback = await _aiService.GenerateFeedback(CurrentWord, UserAnswer);
                 }
 
-                // Сохраняем результат
                 try
                 {
                     await _wordService.SaveExerciseResult(_user.Id, CurrentWord.Id, isCorrect, UserAnswer, Feedback);
+                    Debug.WriteLine("Exercise result saved successfully");
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"Save error: {ex.Message}");
+                    if (ex.InnerException != null)
+                        Debug.WriteLine($"Inner: {ex.InnerException.Message}");
                 }
 
-                ShowFeedback = true; // Показываем фидбек и кнопку "Далее"
+                ShowFeedback = true;
                 this.RaisePropertyChanged(nameof(IsAnswered));
                 this.RaisePropertyChanged(nameof(IsLastWord));
             }
@@ -217,28 +213,35 @@ namespace duolingo_rum.ViewModels
             _currentWordIndex++;
 
             if (_currentWordIndex < (_words?.Count ?? 0))
-            {
                 ShowNextWord();
-            }
             else
-            {
-                // Урок закончен
                 EndLesson();
-            }
         }
 
-        private async void EndLesson()
+        // ✅ ФИКС: больше не async void — теперь запускаем Task явно,
+        // переход на Dashboard только ПОСЛЕ того как сессия закрыта в БД
+        private void EndLesson()
         {
-            try
+            Task.Run(async () =>
             {
-                await _wordService.EndCurrentSession(_user.Id);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"EndSession error: {ex.Message}");
-            }
-
-            _mainVM.CurrentView = new DashboardViewModel(_user, _mainVM);
+                try
+                {
+                    await _wordService.EndCurrentSession(_user.Id);
+                    Debug.WriteLine("Session ended successfully");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"EndSession error: {ex.Message}");
+                }
+                finally
+                {
+                    // ✅ Переход на UI-поток только после завершения записи в БД
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        _mainVM.CurrentView = new DashboardViewModel(_user, _mainVM);
+                    });
+                }
+            });
         }
     }
 }

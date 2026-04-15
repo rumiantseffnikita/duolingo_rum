@@ -171,3 +171,4 @@ C:\Users\rumia\source\repos\duolingo_rum\duolingo_rum\bin\Debug\net8.0\Microsoft
 C:\Users\rumia\source\repos\duolingo_rum\duolingo_rum\bin\Debug\net8.0\System.Text.Encodings.Web.dll
 C:\Users\rumia\source\repos\duolingo_rum\duolingo_rum\bin\Debug\net8.0\System.Text.Json.dll
 C:\Users\rumia\source\repos\duolingo_rum\duolingo_rum\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
+C:\Users\rumia\source\repos\duolingo_rum\duolingo_rum\obj\Debug\net8.0\duolingo_rum.sourcelink.json

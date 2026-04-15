@@ -97,6 +97,9 @@ public partial class _43pRumiantsefContext : DbContext
                 .HasForeignKey(d => d.WordId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("exercise_results_word_id_fkey");
+            entity.Property(e => e.ExerciseType)
+                  .HasColumnName("exercise_type")
+                  .HasMaxLength(50);
         });
 
         modelBuilder.Entity<Language>(entity =>

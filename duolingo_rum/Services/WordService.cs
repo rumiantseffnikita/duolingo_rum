@@ -1,5 +1,4 @@
-﻿// Services/WordService.cs - ПОЛНОСТЬЮ ИСПРАВЛЕННАЯ ВЕРСИЯ
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,13 +8,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace duolingo_rum.Services
 {
-    public class WordService
+    // ✅ ФИКС: WordService теперь IDisposable — контекст корректно освобождается
+    public class WordService : IDisposable
     {
         private readonly _43pRumiantsefContext _context;
+        private bool _disposed = false;
 
         public WordService()
         {
             _context = new _43pRumiantsefContext();
+        }
+
+        // ✅ НОВЫЙ МЕТОД: получаем свежие данные юзера из БД
+        public async Task<User?> GetUserById(Guid userId)
+        {
+            try
+            {
+                // AsNoTracking чтобы не конфликтовало с уже трекаемыми объектами
+                return await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"GetUserById Error: {ex.Message}");
+                return null;
+            }
         }
 
         public async Task<List<Word>> GetWordsForLesson(Guid userId)
@@ -58,7 +76,6 @@ namespace duolingo_rum.Services
             {
                 Debug.WriteLine($"SaveExerciseResult started for user {userId}, word {wordId}");
 
-                // Находим или создаем активную сессию
                 var activeSession = await _context.LearningSessions
                     .FirstOrDefaultAsync(s => s.UserId == userId && s.FinishedAt == null);
 
@@ -69,7 +86,7 @@ namespace duolingo_rum.Services
                         Id = Guid.NewGuid(),
                         UserId = userId,
                         LanguageId = 2,
-                        StartedAt = DateTime.UtcNow,  // UTC!
+                        StartedAt = DateTime.UtcNow,
                         WordsStudied = 0,
                         CorrectAnswers = 0,
                         WrongAnswers = 0,
@@ -80,7 +97,6 @@ namespace duolingo_rum.Services
                     Debug.WriteLine($"Created new session with ID: {activeSession.Id}");
                 }
 
-                // Сохраняем результат упражнения
                 var exerciseResult = new ExerciseResult
                 {
                     SessionId = activeSession.Id,
@@ -89,14 +105,13 @@ namespace duolingo_rum.Services
                     UserAnswer = userAnswer ?? string.Empty,
                     IsCorrect = isCorrect,
                     AiFeedback = aiFeedback ?? string.Empty,
-                    AnsweredAt = DateTime.UtcNow,  // UTC!
+                    AnsweredAt = DateTime.UtcNow,
                     ResponseTimeMs = 0
                 };
 
                 _context.ExerciseResults.Add(exerciseResult);
                 Debug.WriteLine("Exercise result added to context");
 
-                // Обновляем статистику сессии
                 if (isCorrect)
                     activeSession.CorrectAnswers = (activeSession.CorrectAnswers ?? 0) + 1;
                 else
@@ -106,26 +121,18 @@ namespace duolingo_rum.Services
                 activeSession.XpEarned = (activeSession.XpEarned ?? 0) + (isCorrect ? 10 : 5);
 
                 await _context.SaveChangesAsync();
-                Debug.WriteLine("All changes saved successfully");
+                Debug.WriteLine("Session stats saved");
 
-                // Обновляем прогресс пользователя
-                try
+                // ✅ ФИКС: используем Find (трекает по PK, не дублирует запросы)
+                var user = await _context.Users.FindAsync(userId);
+                if (user != null)
                 {
-                    var user = await _context.Users.FindAsync(userId);
-                    if (user != null)
-                    {
-                        user.TotalXp = (user.TotalXp ?? 0) + (isCorrect ? 10 : 5);
-                        user.UpdatedAt = DateTime.UtcNow;  // UTC!
-                        await _context.SaveChangesAsync();
-                        Debug.WriteLine($"User XP updated to {user.TotalXp}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error updating user XP: {ex.Message}");
+                    user.TotalXp = (user.TotalXp ?? 0) + (isCorrect ? 10 : 5);
+                    user.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                    Debug.WriteLine($"User XP updated to {user.TotalXp}");
                 }
 
-                // Обновляем прогресс слова
                 try
                 {
                     await UpdateWordProgressSimple(userId, wordId, isCorrect);
@@ -197,12 +204,9 @@ namespace duolingo_rum.Services
         {
             try
             {
-                var count = await _context.WordProgresses
+                return await _context.WordProgresses
                     .Where(wp => wp.UserId == userId)
                     .CountAsync();
-
-                Debug.WriteLine($"GetLearnedWordsCount for user {userId}: {count}");
-                return count;
             }
             catch (Exception ex)
             {
@@ -217,21 +221,16 @@ namespace duolingo_rum.Services
             {
                 var today = DateTime.UtcNow.Date;
 
-                // Получаем все сессии пользователя
                 var sessions = await _context.LearningSessions
                     .Where(s => s.UserId == userId)
                     .Select(s => s.Id)
                     .ToListAsync();
 
-                // Считаем результаты за сегодня
-                var count = await _context.ExerciseResults
+                return await _context.ExerciseResults
                     .Where(r => sessions.Contains(r.SessionId) &&
                                 r.AnsweredAt.HasValue &&
                                 r.AnsweredAt.Value.Date == today)
                     .CountAsync();
-
-                Debug.WriteLine($"GetTodayProgress for user {userId}: {count} exercises today");
-                return count;
             }
             catch (Exception ex)
             {
@@ -251,7 +250,6 @@ namespace duolingo_rum.Services
                     .Select(wp => wp.Word)
                     .ToListAsync();
 
-                Debug.WriteLine($"GetWordsToReview for user {userId}: found {words?.Count ?? 0} words");
                 return words ?? new List<Word>();
             }
             catch (Exception ex)
@@ -282,6 +280,16 @@ namespace duolingo_rum.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"EndCurrentSession Error: {ex.Message}");
+            }
+        }
+
+        // ✅ ФИКС: Dispose освобождает DbContext и закрывает соединение с БД
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _context?.Dispose();
+                _disposed = true;
             }
         }
     }

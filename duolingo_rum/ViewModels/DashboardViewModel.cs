@@ -1,11 +1,9 @@
-﻿// ViewModels/DashboardViewModel.cs
-using duolingo_rum.Models;
+﻿using duolingo_rum.Models;
 using duolingo_rum.Services;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 
@@ -96,44 +94,50 @@ namespace duolingo_rum.ViewModels
         public ReactiveCommand<Unit, Unit> StartLearningCommand { get; }
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
 
-        // В DashboardViewModel.cs добавьте этот метод и вызовите его в LoadDashboardData
-
         private async void LoadDashboardData()
         {
             IsLoading = true;
 
             try
             {
+                // Имя и цель берём из текущего объекта — они не меняются
                 UserName = _user.Name;
-                StreakDays = _user.StreakDays ?? 0;
-                TotalXp = _user.TotalXp ?? 0;
                 TodayGoal = _user.DailyGoalWords ?? 10;
 
-                // ОТЛАДКА: выводим ID пользователя
-                Debug.WriteLine($"=== Dashboard Loaded for User ID: {_user.Id} ===");
-                Debug.WriteLine($"User Name: {_user.Name}");
+                // ✅ ФИКС: XP и streak читаем СВЕЖИМИ из БД,
+                // а не из кэшированного объекта _user который был загружен при логине
+                var freshUser = await _wordService.GetUserById(_user.Id);
+                if (freshUser != null)
+                {
+                    TotalXp = freshUser.TotalXp ?? 0;
+                    StreakDays = freshUser.StreakDays ?? 0;
+                }
+                else
+                {
+                    // Фолбек на старые данные если БД недоступна
+                    TotalXp = _user.TotalXp ?? 0;
+                    StreakDays = _user.StreakDays ?? 0;
+                }
 
-                // Считаем выученные слова
+                Debug.WriteLine($"=== Dashboard loaded for User: {_user.Name} ({_user.Id}) ===");
+                Debug.WriteLine($"TotalXp: {TotalXp}, StreakDays: {StreakDays}");
+
                 WordsLearned = await _wordService.GetLearnedWordsCount(_user.Id);
                 Debug.WriteLine($"WordsLearned: {WordsLearned}");
 
-                // Считаем прогресс за сегодня
                 TodayProgress = await _wordService.GetTodayProgress(_user.Id);
                 Debug.WriteLine($"TodayProgress: {TodayProgress}");
 
-                // Слова для повторения
                 WordsToReview = await _wordService.GetWordsToReview(_user.Id, 5);
                 Debug.WriteLine($"WordsToReview count: {WordsToReview?.Count ?? 0}");
 
-                // Генерируем AI-совет
                 DailyTip = await GenerateDailyTip();
-                Debug.WriteLine($"DailyTip: {DailyTip}");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"LoadDashboardData ERROR: {ex.Message}");
                 Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                DailyTip = $"📝 Начни урок, чтобы получить персонализированный совет!";
+                DailyTip = "📝 Начни урок, чтобы получить персонализированный совет!";
             }
             finally
             {
@@ -154,8 +158,7 @@ namespace duolingo_rum.ViewModels
 
         private async Task Refresh()
         {
-            await Task.Run(() => LoadDashboardData());
+            LoadDashboardData();
         }
-
     }
 }
