@@ -15,13 +15,23 @@ namespace duolingo_rum
                 LoginViewModel vm => new LoginView { DataContext = vm },
                 DashboardViewModel vm => new DashboardView { DataContext = vm },
                 LessonViewModel vm => new LessonView { DataContext = vm },
+                StatisticsViewModel vm => new StatisticsView { DataContext = vm },
+                VocabularyViewModel vm => new VocabularyView { DataContext = vm },
+                AchievementsViewModel vm => new AchievementsView { DataContext = vm },
+                ProfileViewModel vm => new ProfileView { DataContext = vm },
                 _ => new TextBlock { Text = $"View not found for: {data?.GetType().Name}" }
             };
         }
 
         public bool Match(object? data)
         {
-            return data is LoginViewModel or DashboardViewModel or LessonViewModel;
+            return data is LoginViewModel
+                or DashboardViewModel
+                or LessonViewModel
+                or StatisticsViewModel
+                or VocabularyViewModel
+                or AchievementsViewModel
+                or ProfileViewModel;
         }
     }
 }

@@ -28,6 +28,42 @@
                 <TextBlock Text="Как переводится?" FontSize="14" Foreground="Gray" HorizontalAlignment="Center"/>
                 <TextBlock Text="{Binding CurrentWord.Word1}" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
                 
+                <!-- ✅ НОВО: Кнопка "Показать пример" -->
+                <Button Content="📖 Показать пример с этим словом"
+                        Command="{Binding ShowExampleCommand}"
+                        IsVisible="{Binding ShowFeedback, Converter={StaticResource InvertConverter}}"
+                        HorizontalAlignment="Center"
+                        Background="#9C27B0"
+                        Foreground="White"
+                        CornerRadius="8"
+                        Padding="12,6">
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover">
+                            <Setter Property="Background" Value="#7B1FA2"/>
+                        </Style>
+                    </Button.Styles>
+                </Button>
+                
+                <!-- Индикатор загрузки примера -->
+                <TextBlock Text="🤖 AI генерирует пример..."
+                           IsVisible="{Binding IsLoadingExample}"
+                           Foreground="#9C27B0"
+                           FontSize="12"
+                           HorizontalAlignment="Center"/>
+                
+                <!-- ✅ НОВО: Блок с примером предложения -->
+                <Border IsVisible="{Binding ShowExample}"
+                        Background="#F3E5F5"
+                        CornerRadius="8"
+                        Padding="12"
+                        MaxWidth="400">
+                    <TextBlock Text="{Binding ExampleSentence}"
+                               TextWrapping="Wrap"
+                               Foreground="#4A148C"
+                               FontSize="14"
+                               HorizontalAlignment="Center"/>
+                </Border>
+                
                 <!-- Поле ввода (видно только до ответа) -->
                 <TextBox Text="{Binding UserAnswer}" 
                          Watermark="Введите перевод..."
@@ -42,7 +78,7 @@
                         Width="200"
                         HorizontalAlignment="Center"/>
                 
-                <!-- Индикатор загрузки -->
+                <!-- Индикатор загрузки AI фидбека -->
                 <TextBlock Text="🤖 AI анализирует..." 
                            IsVisible="{Binding IsLoading}"
                            Foreground="Gray"
