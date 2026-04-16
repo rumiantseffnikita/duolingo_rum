@@ -1,0 +1,201 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:duolingo_rum.ViewModels"
+             x:Class="duolingo_rum.Views.StatisticsView"
+             x:DataType="vm:StatisticsViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+
+        <!-- Шапка -->
+        <Border Grid.Row="0" Background="#E64A19" Padding="15">
+            <Grid ColumnDefinitions="Auto, *">
+                <Button Grid.Column="0" Content="← Назад" Command="{Binding BackCommand}"
+                        Background="Transparent" Foreground="White" FontSize="16"/>
+                <TextBlock Grid.Column="1" Text="📊 Статистика" FontSize="22" FontWeight="Bold"
+                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Margin="15" Spacing="14">
+
+                <!-- Загрузка -->
+                <TextBlock Text="⏳ Загрузка статистики..."
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalAlignment="Center" Foreground="Gray"
+                           FontSize="16" Margin="0,30"/>
+
+                <!-- Основные карточки 2x2 -->
+                <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto"
+                      ColumnSpacing="10" RowSpacing="10"
+                      IsVisible="{Binding !IsLoading}">
+
+                    <!-- XP -->
+                    <Border Grid.Row="0" Grid.Column="0"
+                            Background="#FF8F00" CornerRadius="12" Padding="14">
+                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                            <TextBlock Text="⭐" FontSize="26" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalXp}" FontSize="28" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center"/>
+                            <TextBlock Text="всего XP" FontSize="12"
+                                       Foreground="#FFF9C4" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Текущая серия -->
+                    <Border Grid.Row="0" Grid.Column="1"
+                            Background="#43A047" CornerRadius="12" Padding="14">
+                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                            <TextBlock Text="🔥" FontSize="26" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding StreakDays}" FontSize="28" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center"/>
+                            <TextBlock Text="дней подряд" FontSize="12"
+                                       Foreground="#C8E6C9" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Рекорд серии -->
+                    <Border Grid.Row="1" Grid.Column="0"
+                            Background="#8E24AA" CornerRadius="12" Padding="14">
+                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                            <TextBlock Text="🏅" FontSize="26" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding LongestStreak}" FontSize="28" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center"/>
+                            <TextBlock Text="рекорд серии" FontSize="12"
+                                       Foreground="#E1BEE7" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Слов выучено -->
+                    <Border Grid.Row="1" Grid.Column="1"
+                            Background="#039BE5" CornerRadius="12" Padding="14">
+                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                            <TextBlock Text="📖" FontSize="26" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalWordsLearned}" FontSize="28" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center"/>
+                            <TextBlock Text="слов выучено" FontSize="12"
+                                       Foreground="#B3E5FC" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Детальная статистика -->
+                <Border Background="#F5F5F5" CornerRadius="12" Padding="15"
+                        IsVisible="{Binding !IsLoading}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Подробнее" FontWeight="Bold" FontSize="15"/>
+
+                        <!-- Точность -->
+                        <StackPanel Spacing="4">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <TextBlock Grid.Column="0" Text="🎯 Точность ответов"/>
+                                <TextBlock Grid.Column="1" FontWeight="Bold">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0}%">
+                                            <Binding Path="AccuracyPercent"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Grid>
+                            <ProgressBar Value="{Binding AccuracyPercent}" Maximum="100"
+                                         Height="8" Foreground="#4CAF50"/>
+                        </StackPanel>
+
+                        <!-- Сессии -->
+                        <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock Grid.Column="0" Text="📅 Всего занятий"/>
+                            <TextBlock Grid.Column="1" Text="{Binding TotalSessions}" FontWeight="Bold"/>
+                        </Grid>
+
+                        <!-- Сегодня -->
+                        <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock Grid.Column="0" Text="✅ Правильно сегодня"/>
+                            <TextBlock Grid.Column="1" Text="{Binding TodayCorrect}" FontWeight="Bold"/>
+                        </Grid>
+
+                        <!-- За неделю -->
+                        <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock Grid.Column="0" Text="📈 Ответов за неделю"/>
+                            <TextBlock Grid.Column="1" Text="{Binding WeeklyAnswers}" FontWeight="Bold"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- AI анализ -->
+                <Border Background="#FBE9E7" CornerRadius="12" Padding="15"
+                        IsVisible="{Binding !IsLoading}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="🤖 AI анализ прогресса" FontWeight="Bold"
+                                   Foreground="#BF360C" FontSize="15"/>
+                        <TextBlock Text="{Binding AiAnalysis}"
+                                   TextWrapping="Wrap" FontSize="13"
+                                   Foreground="#4E342E"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Последние сессии -->
+                <Border Background="White" CornerRadius="12" Padding="15"
+                        IsVisible="{Binding !IsLoading}"
+                        BoxShadow="0 2 6 #14000000">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="🕐 Последние занятия" FontWeight="Bold" FontSize="15"/>
+
+                        <ItemsControl ItemsSource="{Binding RecentSessions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FAFAFA" CornerRadius="8"
+                                            Padding="12,8" Margin="0,3">
+                                        <Grid ColumnDefinitions="*, Auto, Auto">
+
+                                            <!-- Дата и язык -->
+                                            <StackPanel Grid.Column="0" Spacing="2">
+                                                <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:dd.MM.yyyy}'}"
+                                                           FontWeight="Bold" FontSize="13"/>
+                                                <TextBlock Text="{Binding Language.Name}"
+                                                           FontSize="12" Foreground="#888"/>
+                                            </StackPanel>
+
+                                            <!-- Слова и точность -->
+                                            <StackPanel Grid.Column="1" Margin="10,0" HorizontalAlignment="Center">
+                                                <TextBlock FontSize="12" Foreground="#555">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="📖 {0} сл.">
+                                                            <Binding Path="WordsStudied"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <TextBlock FontSize="12" Foreground="#4CAF50">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="✓ {0}">
+                                                            <Binding Path="CorrectAnswers"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- XP -->
+                                            <TextBlock Grid.Column="2"
+                                                       FontWeight="Bold" Foreground="#FF9800"
+                                                       VerticalAlignment="Center">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="⭐ +{0}">
+                                                        <Binding Path="XpEarned"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>
+
+</UserControl>

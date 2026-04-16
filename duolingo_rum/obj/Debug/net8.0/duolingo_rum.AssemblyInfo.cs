@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("duolingo_rum")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+855cb33af28394571ab85c100c0bed43418be5e8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+62a7f269f53b8b7c6a15050e8e33772d4b6e6bee")]
 [assembly: System.Reflection.AssemblyProductAttribute("duolingo_rum")]
 [assembly: System.Reflection.AssemblyTitleAttribute("duolingo_rum")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

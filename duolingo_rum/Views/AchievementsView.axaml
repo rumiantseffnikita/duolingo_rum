@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:duolingo_rum.ViewModels"
+             x:Class="duolingo_rum.Views.AchievementsView"
+             x:DataType="vm:AchievementsViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+
+        <!-- Шапка -->
+        <Border Grid.Row="0" Background="#673AB7" Padding="15">
+            <Grid ColumnDefinitions="Auto, *, Auto">
+                <Button Grid.Column="0" Content="← Назад" Command="{Binding BackCommand}"
+                        Background="Transparent" Foreground="White" FontSize="16"/>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <TextBlock Text="🏆 Достижения" FontSize="22" FontWeight="Bold"
+                               Foreground="White" HorizontalAlignment="Center"/>
+                    <TextBlock FontSize="13" Foreground="#E1BEE7" HorizontalAlignment="Center">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} из {1} получено">
+                                <Binding Path="EarnedCount"/>
+                                <Binding Path="TotalCount"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Контент -->
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Margin="15" Spacing="12">
+
+                <!-- Загрузка -->
+                <TextBlock Text="⏳ Загрузка достижений..."
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalAlignment="Center"
+                           Foreground="Gray" FontSize="16" Margin="0,30"/>
+
+                <!-- Прогресс-бар общий -->
+                <Border Background="#F3E5F5" CornerRadius="10" Padding="15"
+                        IsVisible="{Binding !IsLoading}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Общий прогресс" FontWeight="Bold" Foreground="#4A148C"/>
+                        <ProgressBar Value="{Binding EarnedCount}" Maximum="{Binding TotalCount}"
+                                     Height="10" Foreground="#673AB7"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Список достижений -->
+                <ItemsControl ItemsSource="{Binding Achievements}"
+                              IsVisible="{Binding !IsLoading}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:AchievementItem">
+                            <Border CornerRadius="12" Padding="15" Margin="0,4"
+                                    Background="White"
+                                    Opacity="{Binding Opacity}"
+                                    BoxShadow="6 2 0 #22000000">
+                                <Grid ColumnDefinitions="60, *">
+
+                                    <!-- Иконка -->
+                                    <Border Grid.Column="0"
+                                            Width="50" Height="50"
+                                            CornerRadius="25"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="#673AB7" Opacity="0.15"/>
+                                        </Border.Background>
+                                        <TextBlock Text="{Binding Achievement.IconEmoji}"
+                                                   FontSize="26"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Текст -->
+                                    <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="3" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Achievement.Name}"
+                                                   FontWeight="Bold" FontSize="15"/>
+                                        <TextBlock Text="{Binding Achievement.Description}"
+                                                   TextWrapping="Wrap" FontSize="13"
+                                                   Foreground="#555"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                            <TextBlock Text="{Binding EarnedText}"
+                                                       FontSize="12" Foreground="#888"/>
+                                            <TextBlock FontSize="12" Foreground="#FF9800"
+                                                       IsVisible="{Binding Achievement.XpReward}">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="⭐ +{0} XP">
+                                                        <Binding Path="Achievement.XpReward"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>
+
+</UserControl>

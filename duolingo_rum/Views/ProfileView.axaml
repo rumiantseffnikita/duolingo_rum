@@ -1,0 +1,120 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:duolingo_rum.ViewModels"
+             x:Class="duolingo_rum.Views.ProfileView"
+             x:DataType="vm:ProfileViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+
+        <!-- Шапка -->
+        <Border Grid.Row="0" Background="#00796B" Padding="15">
+            <Grid ColumnDefinitions="Auto, *">
+                <Button Grid.Column="0" Content="← Назад" Command="{Binding BackCommand}"
+                        Background="Transparent" Foreground="White" FontSize="16"/>
+                <TextBlock Grid.Column="1" Text="👤 Профиль" FontSize="22" FontWeight="Bold"
+                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Margin="20" Spacing="15">
+
+                <!-- Аватар и имя -->
+                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                    <Border Width="90" Height="90" CornerRadius="45"
+                            Background="#B2DFDB" HorizontalAlignment="Center">
+                        <TextBlock Text="👤" FontSize="44"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="Bold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Email}" FontSize="13" Foreground="#777"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock FontSize="12" Foreground="#AAA" HorizontalAlignment="Center">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="С нами с {0}">
+                                <Binding Path="MemberSince"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- Быстрые статы -->
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
+                    <Border Grid.Column="0" Background="#FFF8E1" CornerRadius="10" Padding="12">
+                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                            <TextBlock Text="⭐" FontSize="22" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalXp}" FontSize="24" FontWeight="Bold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="всего XP" FontSize="12" Foreground="#888"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" Background="#E8F5E9" CornerRadius="10" Padding="12">
+                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                            <TextBlock Text="🔥" FontSize="22" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding StreakDays}" FontSize="24" FontWeight="Bold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="дней подряд" FontSize="12" Foreground="#888"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Редактирование -->
+                <Border Background="#F5F5F5" CornerRadius="10" Padding="15">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="✏️ Редактировать профиль" FontWeight="Bold" FontSize="15"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Имя" FontSize="13" Foreground="#555"/>
+                            <TextBox Text="{Binding Name}" Watermark="Введите имя"/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Email" FontSize="13" Foreground="#555"/>
+                            <TextBox Text="{Binding Email}" IsEnabled="False"
+                                     Watermark="Email" Foreground="#AAA"/>
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Цель: слов/день" FontSize="13" Foreground="#555"/>
+                                <NumericUpDown Value="{Binding DailyGoalWords}"
+                                               Minimum="1" Maximum="100"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Цель: мин/день" FontSize="13" Foreground="#555"/>
+                                <NumericUpDown Value="{Binding DailyGoalMinutes}"
+                                               Minimum="1" Maximum="120"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Кнопка сохранения -->
+                        <Button Command="{Binding SaveCommand}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Background="#00796B" Foreground="White"
+                                Height="44" CornerRadius="8"
+                                IsEnabled="{Binding !IsLoading}">
+                            <TextBlock Text="💾 Сохранить" FontSize="15" FontWeight="Bold"/>
+                        </Button>
+
+                        <!-- Сообщение -->
+                        <TextBlock Text="{Binding SaveMessage}"
+                                   IsVisible="{Binding SaveMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                   TextWrapping="Wrap" FontSize="13"
+                                   HorizontalAlignment="Center"/>
+
+                        <!-- Загрузка -->
+                        <TextBlock Text="Сохранение..." IsVisible="{Binding IsLoading}"
+                                   HorizontalAlignment="Center" Foreground="Gray"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>
+
+</UserControl>

@@ -1,0 +1,137 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:duolingo_rum.ViewModels"
+             x:Class="duolingo_rum.Views.VocabularyView"
+             x:DataType="vm:VocabularyViewModel">
+
+    <Grid RowDefinitions="Auto, Auto, *">
+
+        <!-- Шапка -->
+        <Border Grid.Row="0" Background="#1565C0" Padding="15">
+            <Grid ColumnDefinitions="Auto, *">
+                <Button Grid.Column="0" Content="← Назад" Command="{Binding BackCommand}"
+                        Background="Transparent" Foreground="White" FontSize="16"/>
+                <TextBlock Grid.Column="1" Text="📚 Словарь" FontSize="22" FontWeight="Bold"
+                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Поиск -->
+        <Border Grid.Row="1" Background="#E3F2FD" Padding="12,8">
+            <TextBox Text="{Binding SearchText}"
+                     Watermark="🔍 Поиск слова или перевода..."
+                     CornerRadius="20"/>
+        </Border>
+
+        <!-- Контент -->
+        <ScrollViewer Grid.Row="2">
+            <StackPanel Margin="15" Spacing="12">
+
+                <!-- Загрузка -->
+                <TextBlock Text="⏳ Загрузка словаря..."
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalAlignment="Center" Foreground="Gray"
+                           FontSize="16" Margin="0,30"/>
+
+                <!-- Группы тем -->
+                <ItemsControl ItemsSource="{Binding FilteredGroups}"
+                              IsVisible="{Binding !IsLoading}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:VocabularyGroupItem">
+                            <Border Background="White" CornerRadius="12" Padding="0"
+                                    Margin="0,0,0,10"
+                                    BoxShadow="0 2 6 #18000000">
+                                <StackPanel>
+
+                                    <!-- Заголовок темы -->
+                                    <Border Background="#1565C0" CornerRadius="12,12,0,0" Padding="12,10">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{Binding TopicEmoji}" FontSize="18"/>
+                                                <TextBlock Text="{Binding TopicName}"
+                                                           FontWeight="Bold" FontSize="15"
+                                                           Foreground="White" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding Progress}"
+                                                       FontSize="13" Foreground="#90CAF9"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Прогресс-бар темы -->
+                                    <ProgressBar Value="{Binding LearnedCount}"
+                                                 Maximum="{Binding TotalCount}"
+                                                 Height="4" Foreground="#42A5F5"
+                                                 Background="#BBDEFB" CornerRadius="0"/>
+
+                                    <!-- Слова -->
+                                    <ItemsControl ItemsSource="{Binding Words}" Margin="0,4,0,4">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:VocabularyWordItem">
+                                                <Border Padding="12,8" Margin="0,1">
+                                                    <Grid ColumnDefinitions="Auto, *, Auto, Auto">
+
+                                                        <!-- Статус -->
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="{Binding StatusEmoji}"
+                                                                   FontSize="16" Width="28"
+                                                                   VerticalAlignment="Center"/>
+
+                                                        <!-- Слово и перевод -->
+                                                        <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Word.Word1}"
+                                                                       FontWeight="Bold" FontSize="14"/>
+                                                            <TextBlock Text="{Binding Word.Translation}"
+                                                                       Foreground="#666" FontSize="12"/>
+                                                        </StackPanel>
+
+                                                        <!-- Правильно/неправильно -->
+                                                        <StackPanel Grid.Column="2" Margin="6,0"
+                                                                    VerticalAlignment="Center">
+                                                            <TextBlock FontSize="11" Foreground="#4CAF50">
+                                                                <TextBlock.Text>
+                                                                    <MultiBinding StringFormat="✓ {0}">
+                                                                        <Binding Path="CorrectCount"/>
+                                                                    </MultiBinding>
+                                                                </TextBlock.Text>
+                                                            </TextBlock>
+                                                            <TextBlock FontSize="11" Foreground="#F44336">
+                                                                <TextBlock.Text>
+                                                                    <MultiBinding StringFormat="✗ {0}">
+                                                                        <Binding Path="WrongCount"/>
+                                                                    </MultiBinding>
+                                                                </TextBlock.Text>
+                                                            </TextBlock>
+                                                        </StackPanel>
+
+                                                        <!-- Следующий повтор -->
+                                                        <TextBlock Grid.Column="3"
+                                                                   Text="{Binding NextReviewText}"
+                                                                   FontSize="11" Foreground="#999"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Пусто -->
+                <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,40"
+                            IsVisible="{Binding !IsLoading}">
+                    <TextBlock Text="🔍 Ничего не найдено" FontSize="16" Foreground="#AAA"
+                               HorizontalAlignment="Center"
+                               IsVisible="{Binding FilteredGroups.Count, Converter={x:Static ObjectConverters.IsNull}}"/>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>
+
+</UserControl>

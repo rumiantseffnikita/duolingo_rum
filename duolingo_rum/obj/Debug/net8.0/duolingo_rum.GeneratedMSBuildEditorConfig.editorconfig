@@ -24,6 +24,9 @@ build_property.EnableCodeStyleSeverity =
 [C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/AchievementsView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/DashboardView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
@@ -34,4 +37,13 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/MainWindow.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/ProfileView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/StatisticsView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/VocabularyView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
