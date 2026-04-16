@@ -135,7 +135,7 @@ namespace duolingo_rum.Services
 
                 try
                 {
-                    await UpdateWordProgressSimple(userId, wordId, isCorrect);
+                    await UpdateWordProgressSM2(userId, wordId, isCorrect);
                 }
                 catch (Exception ex)
                 {
@@ -290,6 +290,158 @@ namespace duolingo_rum.Services
             {
                 _context?.Dispose();
                 _disposed = true;
+            }
+        }
+        /// <summary>
+        /// SRS: умный подбор слов — сначала те, у кого NextReview <= сегодня,
+        /// потом новые (без записи в word_progress).
+        /// </summary>
+        public async Task<List<Word>> GetWordsForLessonSRS(Guid userId, int count = 10)
+        {
+            try
+            {
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+                // 1. Слова на повторение (просрочены или на сегодня)
+                var reviewWords = await _context.WordProgresses
+                    .Where(wp => wp.UserId == userId && wp.NextReview <= today)
+                    .OrderBy(wp => wp.NextReview)
+                    .Take(count)
+                    .Include(wp => wp.Word)
+                    .Select(wp => wp.Word)
+                    .ToListAsync();
+
+                if (reviewWords.Count >= count)
+                    return reviewWords;
+
+                // 2. Добираем новыми словами (которых нет в word_progress)
+                var learnedWordIds = await _context.WordProgresses
+                    .Where(wp => wp.UserId == userId)
+                    .Select(wp => wp.WordId)
+                    .ToListAsync();
+
+                var newWords = await _context.Words
+                    .Where(w => !learnedWordIds.Contains(w.Id))
+                    .Take(count - reviewWords.Count)
+                    .ToListAsync();
+
+                reviewWords.AddRange(newWords);
+                Debug.WriteLine($"SRS: {reviewWords.Count - newWords.Count} на повторение, {newWords.Count} новых");
+                return reviewWords;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"GetWordsForLessonSRS ERROR: {ex.Message}");
+                return await GetWordsForLesson(userId); // фолбек на старый метод
+            }
+        }
+
+        /// <summary>
+        /// Обновляем интервал повторения по алгоритму SM-2.
+        /// </summary>
+        private async Task UpdateWordProgressSM2(Guid userId, int wordId, bool isCorrect)
+        {
+            try
+            {
+                var progress = await _context.WordProgresses
+                    .FirstOrDefaultAsync(wp => wp.UserId == userId && wp.WordId == wordId);
+
+                if (progress == null)
+                {
+                    progress = new WordProgress
+                    {
+                        UserId = userId,
+                        WordId = wordId,
+                        Repetitions = 0,
+                        EasinessFactor = 2.5m,
+                        IntervalDays = 1,
+                        CorrectCount = 0,
+                        WrongCount = 0,
+                        IsLearned = false,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        LastReview = DateOnly.FromDateTime(DateTime.UtcNow),
+                        NextReview = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))
+                    };
+                    _context.WordProgresses.Add(progress);
+                    await _context.SaveChangesAsync();
+                }
+
+                // SM-2 алгоритм
+                if (isCorrect)
+                {
+                    progress.CorrectCount = (progress.CorrectCount ?? 0) + 1;
+                    progress.Repetitions = (progress.Repetitions ?? 0) + 1;
+
+                    int interval;
+                    if (progress.Repetitions == 1) interval = 1;
+                    else if (progress.Repetitions == 2) interval = 6;
+                    else interval = (int)Math.Round((progress.IntervalDays ?? 1) * (double)(progress.EasinessFactor ?? 2.5m));
+
+                    // Качество ответа: правильный = 4 (по шкале SM-2)
+                    const double q = 4.0;
+                    var ef = (double)(progress.EasinessFactor ?? 2.5m);
+                    ef = ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
+                    ef = Math.Max(1.3, ef);
+
+                    progress.EasinessFactor = (decimal)Math.Round(ef, 2);
+                    progress.IntervalDays = interval;
+                    progress.IsLearned = progress.Repetitions >= 3;
+                }
+                else
+                {
+                    progress.WrongCount = (progress.WrongCount ?? 0) + 1;
+                    // При ошибке сбрасываем — повторить завтра
+                    progress.Repetitions = 0;
+                    progress.IntervalDays = 1;
+                }
+
+                progress.LastReview = DateOnly.FromDateTime(DateTime.UtcNow);
+                progress.NextReview = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(progress.IntervalDays ?? 1));
+                progress.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                Debug.WriteLine($"SM-2 updated: interval={progress.IntervalDays}, ef={progress.EasinessFactor}, nextReview={progress.NextReview}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"UpdateWordProgressSM2 ERROR: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Словарь: все слова пользователя с прогрессом, сгруппированные по топикам.
+        /// </summary>
+        public async Task<List<(Topic? Topic, List<(Word Word, WordProgress? Progress)> Words)>> GetVocabulary(Guid userId)
+        {
+            try
+            {
+                var allWords = await _context.Words
+                    .Include(w => w.Topic)
+                    .OrderBy(w => w.TopicId)
+                    .ThenBy(w => w.Word1)
+                    .ToListAsync();
+
+                var progresses = await _context.WordProgresses
+                    .Where(wp => wp.UserId == userId)
+                    .ToListAsync();
+
+                var progressMap = progresses.ToDictionary(p => p.WordId);
+
+                var grouped = allWords
+                    .GroupBy(w => w.Topic)
+                    .Select(g => (
+                        g.Key,
+                        g.Select(w => (w, progressMap.TryGetValue(w.Id, out var p) ? p : null)).ToList()
+                    ))
+                    .ToList();
+
+                return grouped;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"GetVocabulary ERROR: {ex.Message}");
+                return new();
             }
         }
     }

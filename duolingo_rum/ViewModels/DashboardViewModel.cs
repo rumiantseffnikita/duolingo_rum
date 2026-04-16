@@ -33,6 +33,10 @@ namespace duolingo_rum.ViewModels
 
             StartLearningCommand = ReactiveCommand.CreateFromTask(StartLearning);
             RefreshCommand = ReactiveCommand.CreateFromTask(Refresh);
+            GoToStatsCommand = ReactiveCommand.Create(() => { _mainVM.CurrentView = new StatisticsViewModel(_user, _mainVM); });
+            GoToAchievementsCommand = ReactiveCommand.Create(() => { _mainVM.CurrentView = new AchievementsViewModel(_user, _mainVM); });
+            GoToVocabularyCommand = ReactiveCommand.Create(() => { _mainVM.CurrentView = new VocabularyViewModel(_user, _mainVM); });
+            GoToProfileCommand = ReactiveCommand.Create(() => { _mainVM.CurrentView = new ProfileViewModel(_user, _mainVM); });
 
             LoadDashboardData();
         }
@@ -91,8 +95,13 @@ namespace duolingo_rum.ViewModels
             set => this.RaiseAndSetIfChanged(ref _dailyTip, value);
         }
 
+
         public ReactiveCommand<Unit, Unit> StartLearningCommand { get; }
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
+        public ReactiveCommand<Unit, Unit> GoToStatsCommand { get; }
+        public ReactiveCommand<Unit, Unit> GoToAchievementsCommand { get; }
+        public ReactiveCommand<Unit, Unit> GoToVocabularyCommand { get; }
+        public ReactiveCommand<Unit, Unit> GoToProfileCommand { get; }
 
         private async void LoadDashboardData()
         {
