@@ -13,6 +13,11 @@ namespace duolingo_rum.Services
         private readonly _43pRumiantsefContext _context;
         private bool _disposed = false;
 
+        public StatisticsService(_43pRumiantsefContext context)
+        {
+            _context = context;
+        }
+
         public StatisticsService()
         {
             _context = new _43pRumiantsefContext();

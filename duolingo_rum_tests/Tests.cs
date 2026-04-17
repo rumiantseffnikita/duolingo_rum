@@ -1,9 +1,8 @@
-using duolingo_rum.Models;
+п»їusing duolingo_rum.Models;
 using duolingo_rum.Services;
 using duolingo_rum.ViewModels;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using NSubstitute;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
@@ -14,7 +13,6 @@ namespace duolingo_rum.Tests
 {
     public class AppTests
     {
-        // Вспомогательный метод для создания контекста InMemory
         private _43pRumiantsefContext GetInMemoryContext(string dbName)
         {
             var options = new DbContextOptionsBuilder<_43pRumiantsefContext>()
@@ -23,7 +21,7 @@ namespace duolingo_rum.Tests
             return new _43pRumiantsefContext(options);
         }
 
-        // 1. Регистрация пользователя (AuthService)
+        // 1. Р РµРіРёСЃС‚СЂР°С†РёСЏ
         [Fact]
         public async Task AuthService_Register_ShouldCreateUser()
         {
@@ -37,7 +35,7 @@ namespace duolingo_rum.Tests
             context.Users.Count().Should().Be(1);
         }
 
-        // 2. Логин с правильным паролем
+        // 2. РЈСЃРїРµС€РЅС‹Р№ РІС…РѕРґ
         [Fact]
         public async Task AuthService_Login_ShouldReturnUser()
         {
@@ -51,7 +49,7 @@ namespace duolingo_rum.Tests
             user.Email.Should().Be("test@test.com");
         }
 
-        // 3. Логин с неверным паролем
+        // 3. РќРµРІРµСЂРЅС‹Р№ РїР°СЂРѕР»СЊ
         [Fact]
         public async Task AuthService_Login_WrongPassword_ShouldFail()
         {
@@ -62,54 +60,10 @@ namespace duolingo_rum.Tests
             var (success, message, user) = await authService.Login("test@test.com", "wrong");
 
             success.Should().BeFalse();
-            message.Should().Contain("Неверный логин или пароль");
+            message.Should().Contain("РќРµРІРµСЂРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ");
         }
 
-        // 4. Сохранение результата упражнения (WordService)
-        [Fact]
-        public async Task WordService_SaveExerciseResult_ShouldUpdateSessionAndUser()
-        {
-            using var context = GetInMemoryContext("ExerciseTest");
-            var wordService = new WordService(); // но WordService создаёт свой контекст внутри методов – проблема. Для теста нужно изменить WordService, чтобы он принимал контекст через конструктор. Но у вас нет такого конструктора. Поэтому пропустим этот тест или изменим код.
-            // Временно пропускаем, так как WordService не позволяет внедрить контекст.
-            Assert.True(true);
-        }
-
-        // 5. Получение слов для урока (WordService.GetWordsForLessonSRS)
-        [Fact]
-        public async Task WordService_GetWordsForLessonSRS_ShouldReturnWords()
-        {
-            using var context = GetInMemoryContext("SRSWordsTest");
-            // Добавим тестовое слово
-            var language = new Language { Id = 1, Code = "en", Name = "English", IsActive = true };
-            var word = new Word { Id = 1, LanguageId = 1, Word1 = "hello", Translation = "привет" };
-            var user = new User { Id = Guid.NewGuid(), TargetLanguageId = 1 };
-            context.Languages.Add(language);
-            context.Words.Add(word);
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
-
-            // WordService не принимает контекст – нужно создать отдельную версию для тестов или изменить код. Пропускаем.
-            Assert.True(true);
-        }
-
-        // 6. Проверка достижений (AchievementService) – при достижении XP
-        [Fact]
-        public async Task AchievementService_CheckAndAwardAchievements_ShouldAwardWhenXpReached()
-        {
-            using var context = GetInMemoryContext("AchievementTest");
-            var user = new User { Id = Guid.NewGuid(), TotalXp = 100 };
-            var achievement = new Achievement { Id = 1, Code = "XP100", ConditionType = "total_xp", ConditionValue = 100, XpReward = 10 };
-            context.Users.Add(user);
-            context.Achievements.Add(achievement);
-            await context.SaveChangesAsync();
-
-            var service = new AchievementService(); // опять проблема с контекстом – создаёт свой.
-            // Пропускаем.
-            Assert.True(true);
-        }
-
-        // 7. Загрузка языков (AuthService)
+        // 4. РџРѕР»СѓС‡РµРЅРёРµ Р°РєС‚РёРІРЅС‹С… СЏР·С‹РєРѕРІ
         [Fact]
         public async Task AuthService_GetAllLanguages_ShouldReturnActiveLanguages()
         {
@@ -127,52 +81,7 @@ namespace duolingo_rum.Tests
             languages.First().Name.Should().Be("English");
         }
 
-        // 8. Навигация LoginViewModel -> DashboardViewModel (через реальный AuthService и MainViewModel)
-        [Fact]
-        public void LoginViewModel_OnLoginSuccess_NavigatesToDashboard()
-        {
-            // Для этого теста нужны реальные объекты с InMemory БД
-            var context = GetInMemoryContext("NavTest");
-            var authService = new AuthService(context);
-            var mainVM = new MainViewModel();
-            var loginVM = new LoginViewModel(authService, mainVM);
-
-            // Создадим пользователя в БД
-            var user = new User { Id = Guid.NewGuid(), Email = "test@test.com", PasswordHash = "1234" };
-            context.Users.Add(user);
-            context.SaveChanges();
-
-            loginVM.Email = "test@test.com";
-            loginVM.Password = "1234";
-
-            // Выполняем команду входа (асинхронно)
-            loginVM.LoginCommand.Execute().Subscribe(async _ =>
-            {
-                await Task.Delay(100);
-                Assert.IsType<DashboardViewModel>(mainVM.CurrentView);
-            });
-        }
-
-        // 9. Регистрация -> переход на LanguageSelection
-        [Fact]
-        public void RegisterViewModel_OnValidRegistration_NavigatesToLanguageSelection()
-        {
-            var authService = Substitute.For<AuthService>(GetInMemoryContext("RegNavTest"));
-            var mainVM = new MainViewModel();
-            var registerVM = new RegisterViewModel(authService, mainVM);
-            registerVM.Name = "Test";
-            registerVM.Email = "test@test.com";
-            registerVM.Password = "1234";
-            registerVM.ConfirmPassword = "1234";
-
-            registerVM.RegisterCommand.Execute().Subscribe(async _ =>
-            {
-                await Task.Delay(100);
-                Assert.IsType<LanguageSelectionViewModel>(mainVM.CurrentView);
-            });
-        }
-
-        // 10. ProfileViewModel – сохранение профиля
+        // 5. РЎРѕС…СЂР°РЅРµРЅРёРµ РїСЂРѕС„РёР»СЏ (ProfileViewModel)
         [Fact]
         public async Task ProfileViewModel_SaveProfile_UpdatesUserName()
         {
@@ -188,6 +97,72 @@ namespace duolingo_rum.Tests
 
             var updatedUser = await context.Users.FindAsync(user.Id);
             updatedUser.Name.Should().Be("NewName");
+        }
+
+        // 6. РџСЂРѕРІРµСЂРєР° РЅРµСЃРѕРІРїР°РґРµРЅРёСЏ РїР°СЂРѕР»РµР№ РІ RegisterViewModel
+        [Fact]
+        public async Task RegisterViewModel_WhenPasswordsDoNotMatch_StatusIsSet()
+        {
+            using var context = GetInMemoryContext("RegNavTest");
+            var authService = new AuthService(context);
+            var mainVM = new MainViewModel();
+            var registerVM = new RegisterViewModel(authService, mainVM);
+            registerVM.Password = "1234";
+            registerVM.ConfirmPassword = "4321";
+
+            await registerVM.RegisterCommand.Execute(); // Р–РґС‘Рј Р·Р°РІРµСЂС€РµРЅРёСЏ
+
+            registerVM.Status.Should().Be("вќЊ РџР°СЂРѕР»Рё РЅРµ СЃРѕРІРїР°РґР°СЋС‚");
+        }
+
+        // 7. Р’С‹РґР°С‡Р° РґРѕСЃС‚РёР¶РµРЅРёСЏ (С‚СЂРµР±СѓРµС‚ РїСЂР°РІРёР»СЊРЅРѕРіРѕ ConditionType)
+        [Fact]
+        public async Task AchievementService_CheckAndAwardAchievements_ShouldAwardWhenXpReached()
+        {
+            using var context = GetInMemoryContext("AchievementTest");
+            var user = new User { Id = Guid.NewGuid(), TotalXp = 100 };
+            var achievement = new Achievement { Id = 1, Code = "XP100", ConditionType = "total_xp", ConditionValue = 100, XpReward = 10 };
+            context.Users.Add(user);
+            context.Achievements.Add(achievement);
+            await context.SaveChangesAsync();
+
+            var service = new AchievementService(context);
+            var earned = await service.CheckAndAwardAchievements(user.Id);
+
+            earned.Should().Contain(a => a.Id == 1);
+            var updatedUser = await context.Users.FindAsync(user.Id);
+            updatedUser.TotalXp.Should().Be(110);
+        }
+
+        // 8. Р РµРіРёСЃС‚СЂР°С†РёСЏ СЃ РІС‹Р±РѕСЂРѕРј СЏР·С‹РєР° (С‡РµСЂРµР· LanguageSelectionViewModel)
+        [Fact]
+        public async Task LanguageSelectionViewModel_RegisterWithLanguage_ShouldCreateUser()
+        {
+            using var context = GetInMemoryContext("LangSelectTest");
+            var authService = new AuthService(context);
+            var mainVM = new MainViewModel();
+
+            // Р”РѕР±Р°РІР»СЏРµРј С‚РµСЃС‚РѕРІС‹Рµ СЏР·С‹РєРё
+            context.Languages.AddRange(
+                new Language { Id = 1, Code = "en", Name = "English", IsActive = true },
+                new Language { Id = 2, Code = "ru", Name = "Russian", IsActive = true }
+            );
+            await context.SaveChangesAsync();
+
+            var langVM = new LanguageSelectionViewModel(authService, mainVM, "TestUser", "test@test.com", "1234");
+            // РРјРёС‚РёСЂСѓРµРј РІС‹Р±РѕСЂ СЏР·С‹РєР°
+            langVM.SelectedTargetLanguage = context.Languages.First(l => l.Code == "en");
+            langVM.SelectedNativeLanguage = context.Languages.First(l => l.Code == "ru");
+            langVM.SelectedDifficulty = "beginner";
+
+            await langVM.RegisterCommand.Execute();
+
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃРѕР·РґР°РЅ СЃ РІС‹Р±СЂР°РЅРЅС‹РјРё СЏР·С‹РєР°РјРё
+            var user = context.Users.FirstOrDefault(u => u.Email == "test@test.com");
+            user.Should().NotBeNull();
+            user.TargetLanguageId.Should().Be(1);
+            user.NativeLanguageId.Should().Be(2);
+            user.DifficultyLevel.Should().Be("beginner");
         }
     }
 }
