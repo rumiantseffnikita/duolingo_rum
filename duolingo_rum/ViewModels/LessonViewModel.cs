@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using duolingo_rum.Models;
 using duolingo_rum.Services;
+using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 
 namespace duolingo_rum.ViewModels
@@ -19,6 +21,7 @@ namespace duolingo_rum.ViewModels
         private readonly AchievementService _achievementService;
 
         private List<Word> _words = new();
+        private List<GeneratedWord> _generatedWords = new();
         private int _currentWordIndex;
         private Word? _currentWord;
         private string _userAnswer = string.Empty;
@@ -31,7 +34,9 @@ namespace duolingo_rum.ViewModels
         private bool _isLoadingExample;
         private bool _showExample;
         private bool _showNewAchievements;
+        private bool _isAIGenerating;
         private List<Achievement> _newAchievements = new();
+        public ReactiveCommand<Unit, Unit> AbortLessonCommand { get; }
 
         public LessonViewModel(User user, MainViewModel mainVM)
         {
@@ -46,9 +51,12 @@ namespace duolingo_rum.ViewModels
             EndLessonCommand = ReactiveCommand.Create(EndLesson);
             ShowExampleCommand = ReactiveCommand.CreateFromTask(LoadExample);
             CloseAchievementsCommand = ReactiveCommand.Create(CloseAchievements);
+            AbortLessonCommand = ReactiveCommand.Create(AbortLesson);
 
             Task.Run(async () => await LoadWords());
+
         }
+
 
         // ── Свойства ──────────────────────────────
 
@@ -118,6 +126,12 @@ namespace duolingo_rum.ViewModels
             set => this.RaiseAndSetIfChanged(ref _showNewAchievements, value);
         }
 
+        public bool IsAIGenerating
+        {
+            get => _isAIGenerating;
+            set => this.RaiseAndSetIfChanged(ref _isAIGenerating, value);
+        }
+
         public List<Achievement> NewAchievements
         {
             get => _newAchievements;
@@ -135,27 +149,37 @@ namespace duolingo_rum.ViewModels
         public ReactiveCommand<Unit, Unit> ShowExampleCommand { get; }
         public ReactiveCommand<Unit, Unit> CloseAchievementsCommand { get; }
 
-        // ── Логика ────────────────────────────────
-
+        // ── Загрузка слов ─────────────────────────
+        private void AbortLesson()
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await _wordService.EndCurrentSession(_user.Id);
+                    Debug.WriteLine("Lesson aborted by user");
+                    await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        _mainVM.CurrentView = new DashboardViewModel(_user, _mainVM);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"AbortLesson error: {ex.Message}");
+                    await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        _mainVM.CurrentView = new DashboardViewModel(_user, _mainVM);
+                    });
+                }
+            });
+        }
         private async Task LoadWords()
         {
             try
             {
                 IsLoading = true;
-
-                // ✅ SRS: умный подбор слов
-                _words = await _wordService.GetWordsForLessonSRS(_user.Id, 10);
-
-                if (_words == null || _words.Count == 0)
-                    _words = await _wordService.GetAnyWords(5);
-
-                if (_words == null || _words.Count == 0)
-                    _words = CreateTestWords();
-
-                _currentWordIndex = 0;
-                Total = _words.Count;
-                Score = 0;
-                ShowNextWord();
+                // Всегда загружаем слова из БД, пока AI не работает
+                await LoadWordsFromDatabase();
             }
             catch (Exception ex)
             {
@@ -167,6 +191,89 @@ namespace duolingo_rum.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        private async Task LoadWordsFromAI()
+        {
+            try
+            {
+                IsAIGenerating = true;
+
+                // Получаем язык пользователя
+                using var context = new _43pRumiantsefContext();
+                var user = await context.Users
+                    .Include(u => u.TargetLanguage)
+                    .Include(u => u.NativeLanguage)
+                    .FirstOrDefaultAsync(u => u.Id == _user.Id);
+
+                var targetLanguage = user?.TargetLanguage?.Code ?? "en";
+                var nativeLanguage = user?.NativeLanguage?.Code ?? "ru";
+                var difficulty = user?.DifficultyLevel ?? "beginner";
+
+                Debug.WriteLine($"Loading words: targetLang={targetLanguage}, nativeLang={nativeLanguage}, level={difficulty}");
+
+                // Генерируем слова через AI
+                _generatedWords = await _aiService.GenerateWordsForLesson(
+                    targetLanguage,
+                    nativeLanguage,
+                    difficulty,
+                    10
+                );
+
+                if (_generatedWords.Count > 0)
+                {
+                    // Преобразуем в формат Word для урока
+                    var tempId = -1;
+                    _words = _generatedWords.Select(g => new Word
+                    {
+                        Id = tempId--,
+                        Word1 = g.Word,
+                        Translation = g.Translation,
+                        ExampleSentence = g.ExampleSentence,
+                        ExampleTranslation = g.ExampleTranslation,
+                        Transcription = g.Transcription
+                    }).ToList();
+
+                    _currentWordIndex = 0;
+                    Total = _words.Count;
+                    Score = 0;
+                    ShowNextWord();
+
+                    Debug.WriteLine($"✅ AI generated {_generatedWords.Count} words");
+                }
+                else
+                {
+                    Debug.WriteLine("No words generated, falling back to database");
+                    await LoadWordsFromDatabase();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"LoadWordsFromAI error: {ex.Message}");
+                await LoadWordsFromDatabase();
+            }
+            finally
+            {
+                IsAIGenerating = false;
+            }
+        }
+
+        private async Task LoadWordsFromDatabase()
+        {
+            _words = await _wordService.GetWordsForLessonSRS(_user.Id, 10);
+
+            if (_words == null || _words.Count == 0)
+                _words = await _wordService.GetAnyWords(5);
+
+            if (_words == null || _words.Count == 0)
+                _words = CreateTestWords();
+
+            _currentWordIndex = 0;
+            Total = _words.Count;
+            Score = 0;
+            ShowNextWord();
+
+            Debug.WriteLine($"Loaded {_words.Count} words from database");
         }
 
         private void ShowNextWord()
@@ -183,6 +290,8 @@ namespace duolingo_rum.ViewModels
                 this.RaisePropertyChanged(nameof(IsLastWord));
             }
         }
+
+        // ── Проверка ответа ───────────────────────
 
         private async Task CheckAnswer()
         {
@@ -203,7 +312,6 @@ namespace duolingo_rum.ViewModels
                 if (isCorrect)
                 {
                     Score++;
-                    // ✅ AI похвала при правильном ответе (иногда)
                     var praise = await _aiService.GeneratePraise(CurrentWord);
                     Feedback = string.IsNullOrEmpty(praise)
                         ? $"✅ Правильно! {CurrentWord.Word1} — {CurrentWord.Translation}"
@@ -211,17 +319,32 @@ namespace duolingo_rum.ViewModels
                 }
                 else
                 {
-                    // ✅ AI фидбек при ошибке
                     Feedback = await _aiService.GenerateFeedback(CurrentWord, UserAnswer);
                 }
 
-                try
+                // ✅ ВАЖНО: Не сохраняем для временных слов (с отрицательным ID)
+                if (CurrentWord.Id > 0)
                 {
-                    await _wordService.SaveExerciseResult(_user.Id, CurrentWord.Id, isCorrect, UserAnswer, Feedback);
+                    try
+                    {
+                        await _wordService.SaveExerciseResult(_user.Id, CurrentWord.Id, isCorrect, UserAnswer, Feedback);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Save error: {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Debug.WriteLine($"Save error: {ex.Message}");
+                    Debug.WriteLine($"Skipping save for temporary word: {CurrentWord.Word1} (ID: {CurrentWord.Id})");
+                    // Сохраняем в список для последующей записи
+                    _pendingResults.Add(new PendingExerciseResult
+                    {
+                        WordText = CurrentWord.Word1,
+                        IsCorrect = isCorrect,
+                        UserAnswer = UserAnswer,
+                        Feedback = Feedback
+                    });
                 }
 
                 ShowFeedback = true;
@@ -239,9 +362,19 @@ namespace duolingo_rum.ViewModels
             }
         }
 
-        /// <summary>
-        /// ✅ Загрузка AI-примера прямо в уроке по кнопке.
-        /// </summary>
+        // Добавь класс для хранения временных результатов
+        private class PendingExerciseResult
+        {
+            public string WordText { get; set; } = string.Empty;
+            public bool IsCorrect { get; set; }
+            public string UserAnswer { get; set; } = string.Empty;
+            public string Feedback { get; set; } = string.Empty;
+        }
+
+        private List<PendingExerciseResult> _pendingResults = new();
+
+        // ── Пример предложения ────────────────────
+
         private async Task LoadExample()
         {
             if (CurrentWord == null) return;
@@ -263,6 +396,8 @@ namespace duolingo_rum.ViewModels
             }
         }
 
+        // ── Навигация ─────────────────────────────
+
         private void NextWord()
         {
             _currentWordIndex++;
@@ -275,26 +410,35 @@ namespace duolingo_rum.ViewModels
         private void CloseAchievements()
         {
             ShowNewAchievements = false;
-            // Переходим на дашборд после закрытия попапа достижений
             Dispatcher.UIThread.Post(() =>
             {
                 _mainVM.CurrentView = new DashboardViewModel(_user, _mainVM);
             });
         }
 
-        /// <summary>
-        /// ✅ Конец урока: закрываем сессию → проверяем достижения → показываем попап или переходим.
-        /// </summary>
+        // ── Завершение урока ──────────────────────
+
         private void EndLesson()
         {
             Task.Run(async () =>
             {
                 try
                 {
+                    // Сохраняем сгенерированные слова в БД
+                    if (_generatedWords.Count > 0 && _user.TargetLanguageId.HasValue)
+                    {
+                        var savedWords = await _aiService.SaveGeneratedWordsToDatabase(
+                            _user.TargetLanguageId.Value,
+                            _generatedWords
+                        );
+
+                        // Обновляем ID временных слов на реальные
+                        await UpdateExerciseResultsWithRealIds(savedWords);
+                    }
+
                     await _wordService.EndCurrentSession(_user.Id);
                     Debug.WriteLine("Session ended");
 
-                    // ✅ Проверяем и выдаём достижения
                     var earned = await _achievementService.CheckAndAwardAchievements(_user.Id);
                     Debug.WriteLine($"New achievements: {earned.Count}");
 
@@ -302,7 +446,6 @@ namespace duolingo_rum.ViewModels
                     {
                         if (earned.Count > 0)
                         {
-                            // Показываем попап достижений — переход на дашборд из CloseAchievements
                             NewAchievements = earned;
                             ShowNewAchievements = true;
                         }
@@ -322,6 +465,48 @@ namespace duolingo_rum.ViewModels
                 }
             });
         }
+
+        private async Task UpdateExerciseResultsWithRealIds(List<Word> savedWords)
+        {
+            try
+            {
+                using var context = new _43pRumiantsefContext();
+
+                // Создаём маппинг временных ID на реальные
+                var wordMap = new Dictionary<int, int>();
+                for (int i = 0; i < _words.Count && i < savedWords.Count; i++)
+                {
+                    wordMap[_words[i].Id] = savedWords[i].Id;
+                }
+
+                var activeSession = await context.LearningSessions
+                    .FirstOrDefaultAsync(s => s.UserId == _user.Id && s.FinishedAt == null);
+
+                if (activeSession != null)
+                {
+                    var results = await context.ExerciseResults
+                        .Where(r => r.SessionId == activeSession.Id)
+                        .ToListAsync();
+
+                    foreach (var result in results)
+                    {
+                        if (wordMap.ContainsKey(result.WordId))
+                        {
+                            result.WordId = wordMap[result.WordId];
+                        }
+                    }
+
+                    await context.SaveChangesAsync();
+                    Debug.WriteLine("✅ Updated exercise results with real word IDs");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"UpdateExerciseResultsWithRealIds error: {ex.Message}");
+            }
+        }
+
+        // ── Тестовые слова (фолбек) ───────────────
 
         private List<Word> CreateTestWords() => new()
         {

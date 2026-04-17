@@ -296,15 +296,35 @@ namespace duolingo_rum.Services
         /// SRS: умный подбор слов — сначала те, у кого NextReview <= сегодня,
         /// потом новые (без записи в word_progress).
         /// </summary>
+        // WordService.cs - обновить GetWordsForLessonSRS
         public async Task<List<Word>> GetWordsForLessonSRS(Guid userId, int count = 10)
         {
             try
             {
+                // Получаем язык и уровень пользователя
+                var user = await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+
+                if (user?.TargetLanguageId == null)
+                    return await GetAnyWords(count);
+
                 var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-                // 1. Слова на повторение (просрочены или на сегодня)
+                // Определяем уровень сложности для фильтрации слов
+                int maxFrequencyRank = user.DifficultyLevel switch
+                {
+                    "beginner" => 100,      // Самые частотные слова (1-100)
+                    "intermediate" => 500,  // Средние (101-500)
+                    "advanced" => 2000,     // Продвинутые (501-2000)
+                    _ => 500
+                };
+
+                // 1. Слова на повторение (с учетом языка)
                 var reviewWords = await _context.WordProgresses
-                    .Where(wp => wp.UserId == userId && wp.NextReview <= today)
+                    .Where(wp => wp.UserId == userId &&
+                                 wp.NextReview <= today &&
+                                 wp.Word.LanguageId == user.TargetLanguageId)
                     .OrderBy(wp => wp.NextReview)
                     .Take(count)
                     .Include(wp => wp.Word)
@@ -314,25 +334,28 @@ namespace duolingo_rum.Services
                 if (reviewWords.Count >= count)
                     return reviewWords;
 
-                // 2. Добираем новыми словами (которых нет в word_progress)
+                // 2. Новые слова (по языку и уровню)
                 var learnedWordIds = await _context.WordProgresses
                     .Where(wp => wp.UserId == userId)
                     .Select(wp => wp.WordId)
                     .ToListAsync();
 
                 var newWords = await _context.Words
-                    .Where(w => !learnedWordIds.Contains(w.Id))
+                    .Where(w => !learnedWordIds.Contains(w.Id) &&
+                                w.LanguageId == user.TargetLanguageId &&
+                                (w.FrequencyRank <= maxFrequencyRank || w.FrequencyRank == null))
+                    .OrderBy(w => w.FrequencyRank ?? 999)
                     .Take(count - reviewWords.Count)
                     .ToListAsync();
 
                 reviewWords.AddRange(newWords);
-                Debug.WriteLine($"SRS: {reviewWords.Count - newWords.Count} на повторение, {newWords.Count} новых");
+                Debug.WriteLine($"SRS: {reviewWords.Count - newWords.Count} на повторение, {newWords.Count} новых, язык: {user.TargetLanguageId}, уровень: {user.DifficultyLevel}");
                 return reviewWords;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"GetWordsForLessonSRS ERROR: {ex.Message}");
-                return await GetWordsForLesson(userId); // фолбек на старый метод
+                return await GetWordsForLesson(userId);
             }
         }
 
@@ -365,9 +388,7 @@ namespace duolingo_rum.Services
                     };
                     _context.WordProgresses.Add(progress);
                     await _context.SaveChangesAsync();
-                }
-
-                // SM-2 алгоритм
+                }           
                 if (isCorrect)
                 {
                     progress.CorrectCount = (progress.CorrectCount ?? 0) + 1;
@@ -378,7 +399,6 @@ namespace duolingo_rum.Services
                     else if (progress.Repetitions == 2) interval = 6;
                     else interval = (int)Math.Round((progress.IntervalDays ?? 1) * (double)(progress.EasinessFactor ?? 2.5m));
 
-                    // Качество ответа: правильный = 4 (по шкале SM-2)
                     const double q = 4.0;
                     var ef = (double)(progress.EasinessFactor ?? 2.5m);
                     ef = ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));

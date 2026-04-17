@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace duolingo_rum.ViewModels
 {
-    public class LoginViewModel : ReactiveObject
+    public class LoginViewModel : ViewModelBase
     {
         private readonly AuthService _authService;
         private readonly MainViewModel _mainVM;
+
+        private string _email = string.Empty;
+        private string _password = string.Empty;
+        private string _status = string.Empty;
+        private bool _isLoading;
 
         public LoginViewModel(AuthService authService, MainViewModel mainVM)
         {
@@ -17,87 +22,76 @@ namespace duolingo_rum.ViewModels
             _mainVM = mainVM;
 
             LoginCommand = ReactiveCommand.CreateFromTask(Login);
-            RegisterCommand = ReactiveCommand.CreateFromTask(Register);
-
-            RegisterCommand.ThrownExceptions.Subscribe(ex =>
+            GoToRegisterCommand = ReactiveCommand.Create(() =>
             {
-                Status = ex.Message;
-            });
-
-            LoginCommand.ThrownExceptions.Subscribe(ex =>
-            {
-                Status = ex.Message;
+                _mainVM.CurrentView = new RegisterViewModel(_authService, _mainVM);
             });
         }
 
-        private string _email;
         public string Email
         {
             get => _email;
             set => this.RaiseAndSetIfChanged(ref _email, value);
         }
 
-        private string _password;
         public string Password
         {
             get => _password;
             set => this.RaiseAndSetIfChanged(ref _password, value);
         }
 
-        private string _name;
-        public string Name
-        {
-            get => _name;
-            set => this.RaiseAndSetIfChanged(ref _name, value);
-        }
-
-        private string _status;
         public string Status
         {
             get => _status;
             set => this.RaiseAndSetIfChanged(ref _status, value);
         }
 
-        public ReactiveCommand<Unit, Unit> LoginCommand { get; }
-        public ReactiveCommand<Unit, Unit> RegisterCommand { get; }
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => this.RaiseAndSetIfChanged(ref _isLoading, value);
+        }
 
+        public ReactiveCommand<Unit, Unit> LoginCommand { get; }
+        public ReactiveCommand<Unit, Unit> GoToRegisterCommand { get; }
 
         private async Task Login()
         {
-            var result = await _authService.Login(Email, Password);
-
-            Status = result.Message;
-
-            if (result.Success)
+            if (string.IsNullOrWhiteSpace(Email))
             {
-                _mainVM.CurrentView = new DashboardViewModel(result.User, _mainVM);
-            }
-        }
-
-        private async Task Register()
-        {
-            if (string.IsNullOrWhiteSpace(Name) ||
-                string.IsNullOrWhiteSpace(Email) ||
-                string.IsNullOrWhiteSpace(Password))
-            {
-                Status = "Заполни все поля";
+                Status = "❌ Введите email";
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                Status = "❌ Введите пароль";
+                return;
+            }
+
+            IsLoading = true;
+            Status = string.Empty;
+
             try
             {
-                var result = await _authService.Register(Name, Email, Password);
-
-                Status = result.Message;
+                var result = await _authService.Login(Email, Password);
 
                 if (result.Success)
                 {
                     _mainVM.CurrentView = new DashboardViewModel(result.User, _mainVM);
                 }
+                else
+                {
+                    Status = $"❌ {result.Message}";
+                }
             }
             catch (Exception ex)
             {
-                Status = ex.Message;
+                Status = $"❌ Ошибка: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
     }

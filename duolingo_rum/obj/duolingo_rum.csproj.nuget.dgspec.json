@@ -74,6 +74,14 @@
               "target": "Package",
               "version": "[4.1.0, )"
             },
+            "LLamaSharp": {
+              "target": "Package",
+              "version": "[0.26.0, )"
+            },
+            "LLamaSharp.Backend.Cpu": {
+              "target": "Package",
+              "version": "[0.26.0, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.25, )"
@@ -96,9 +104,17 @@
               "target": "Package",
               "version": "[8.0.11, )"
             },
+            "OpenAI": {
+              "target": "Package",
+              "version": "[2.10.0, )"
+            },
             "ReactiveUI.Avalonia": {
               "target": "Package",
               "version": "[11.3.8, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.17.0, )"
             }
           },
           "imports": [

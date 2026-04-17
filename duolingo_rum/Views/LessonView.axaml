@@ -9,108 +9,111 @@
         <conv:InvertBooleanConverter x:Key="InvertConverter"/>
     </UserControl.Resources>
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="20">
+    <UserControl.Styles>
+        <Style Selector="Button.PrimaryButton">
+            <Setter Property="Background" Value="#58CC71"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="CornerRadius" Value="24"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="160"/>
+        </Style>
+        <Style Selector="Button.PrimaryButton:pointerover">
+            <Setter Property="Background" Value="#4CAF50"/>
+        </Style>
+        <Style Selector="Button.SecondaryButton">
+            <Setter Property="Background" Value="#FF9600"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="CornerRadius" Value="24"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="160"/>
+        </Style>
+        <Style Selector="Button.SecondaryButton:pointerover">
+            <Setter Property="Background" Value="#E68900"/>
+        </Style>
+        <Style Selector="Button.AbortButton">
+            <Setter Property="Background" Value="#F44336"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="12,0"/>
+        </Style>
+        <Style Selector="Button.AbortButton:pointerover">
+            <Setter Property="Background" Value="#D32F2F"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="16">
         
-        <!-- Заголовок и прогресс -->
-        <StackPanel Grid.Row="0" Spacing="10">
-            <Grid ColumnDefinitions="*, Auto">
-                <TextBlock Grid.Column="0" Text="📚 Урок" FontSize="24"/>
-                <TextBlock Grid.Column="1" Text="{Binding Score}" FontSize="24" Foreground="Green"/>
-            </Grid>
-            <ProgressBar Value="{Binding Score}" Maximum="{Binding Total}" Height="10"/>
-        </StackPanel>
-        
-        <!-- Карточка с вопросом -->
-        <Border Grid.Row="1" Background="#F0F0F0" CornerRadius="10" Padding="20" Margin="0,20">
-            <StackPanel Spacing="15" HorizontalAlignment="Center">
+        <Border Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*, Auto, Auto">
+                    <TextBlock Grid.Column="0" Text="📚 Урок" FontSize="24" FontWeight="Bold" Foreground="#2D3E50"/>
+                    <Border Grid.Column="1" Background="#58CC71" CornerRadius="20" Padding="12,4">
+                        <TextBlock Text="{Binding Score}" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                    </Border>
+                    <Button Grid.Column="2" Command="{Binding AbortLessonCommand}" 
+                            Content="❌ Завершить" Classes="AbortButton" Margin="12,0,0,0"/>
+                </Grid>
+                <ProgressBar Value="{Binding Score}" Maximum="{Binding Total}" Height="10" CornerRadius="5"
+                             Foreground="#58CC71" Background="#E0E0E0"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Background="White" CornerRadius="24" Padding="24" BoxShadow="0 8 20 #1A000000" VerticalAlignment="Center">
+            <StackPanel Spacing="20" HorizontalAlignment="Center">
                 
-                <!-- Слово для перевода -->
-                <TextBlock Text="Как переводится?" FontSize="14" Foreground="Gray" HorizontalAlignment="Center"/>
-                <TextBlock Text="{Binding CurrentWord.Word1}" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
-                
-                <!-- ✅ НОВО: Кнопка "Показать пример" -->
-                <Button Content="📖 Показать пример с этим словом"
-                        Command="{Binding ShowExampleCommand}"
-                        IsVisible="{Binding ShowFeedback, Converter={StaticResource InvertConverter}}"
-                        HorizontalAlignment="Center"
-                        Background="#9C27B0"
-                        Foreground="White"
-                        CornerRadius="8"
-                        Padding="12,6">
-                    <Button.Styles>
-                        <Style Selector="Button:pointerover">
-                            <Setter Property="Background" Value="#7B1FA2"/>
-                        </Style>
-                    </Button.Styles>
+                <TextBlock Text="Как переводится?" FontSize="16" Foreground="#888" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding CurrentWord.Word1}" FontSize="36" FontWeight="Bold" Foreground="#2D3E50" HorizontalAlignment="Center"/>
+
+                <Button Command="{Binding ShowExampleCommand}" Background="#F0F0F0" Foreground="#555" 
+                        CornerRadius="20" Padding="16,8" HorizontalAlignment="Center"
+                        IsVisible="{Binding ShowFeedback, Converter={StaticResource InvertConverter}}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="📖" FontSize="16"/>
+                        <TextBlock Text="Показать пример" FontSize="14"/>
+                    </StackPanel>
                 </Button>
-                
-                <!-- Индикатор загрузки примера -->
-                <TextBlock Text="🤖 AI генерирует пример..."
-                           IsVisible="{Binding IsLoadingExample}"
-                           Foreground="#9C27B0"
-                           FontSize="12"
-                           HorizontalAlignment="Center"/>
-                
-                <!-- ✅ НОВО: Блок с примером предложения -->
-                <Border IsVisible="{Binding ShowExample}"
-                        Background="#F3E5F5"
-                        CornerRadius="8"
-                        Padding="12"
-                        MaxWidth="400">
-                    <TextBlock Text="{Binding ExampleSentence}"
-                               TextWrapping="Wrap"
-                               Foreground="#4A148C"
-                               FontSize="14"
-                               HorizontalAlignment="Center"/>
+
+                <Border IsVisible="{Binding ShowExample}" Background="#F5F5F5" CornerRadius="16" Padding="16">
+                    <TextBlock Text="{Binding ExampleSentence}" TextWrapping="Wrap" Foreground="#555" FontSize="14"/>
                 </Border>
-                
-                <!-- Поле ввода (видно только до ответа) -->
-                <TextBox Text="{Binding UserAnswer}" 
-                         Watermark="Введите перевод..."
-                         IsVisible="{Binding ShowFeedback, Converter={StaticResource InvertConverter}}"
-                         Width="300"
-                         HorizontalAlignment="Center"/>
-                
-                <!-- Кнопка Проверить (видна только до ответа) -->
-                <Button Content="✓ Проверить" 
-                        Command="{Binding CheckAnswerCommand}"
-                        IsVisible="{Binding ShowFeedback, Converter={StaticResource InvertConverter}}"
-                        Width="200"
-                        HorizontalAlignment="Center"/>
-                
-                <!-- Индикатор загрузки AI фидбека -->
-                <TextBlock Text="🤖 AI анализирует..." 
-                           IsVisible="{Binding IsLoading}"
-                           Foreground="Gray"
-                           HorizontalAlignment="Center"/>
-                
-                <!-- AI Фидбек (виден после ответа) -->
-                <Border IsVisible="{Binding ShowFeedback}" 
-                        Background="#E3F2FD" CornerRadius="8" Padding="15">
-                    <TextBlock Text="{Binding Feedback}" 
-                               TextWrapping="Wrap" 
-                               Foreground="#1565C0"
-                               MaxWidth="400"/>
-                </Border>
-                
-                <!-- Кнопки навигации (видны после ответа) -->
-                <StackPanel Orientation="Horizontal" Spacing="15" 
-                            IsVisible="{Binding ShowFeedback}"
-                            HorizontalAlignment="Center">
-                    
-                    <!-- Кнопка Далее (если не последнее слово) -->
-                    <Button Content="➡ Далее" 
-                            Command="{Binding NextWordCommand}"
-                            IsVisible="{Binding IsLastWord, Converter={StaticResource InvertConverter}}"
-                            Width="150"/>
-                    
-                    <!-- Кнопка Завершить (если последнее слово) -->
-                    <Button Content="🏁 Завершить урок" 
-                            Command="{Binding EndLessonCommand}"
-                            IsVisible="{Binding IsLastWord}"
-                            Width="150"/>
+                <TextBlock Text="🤖 Генерируем пример..." IsVisible="{Binding IsLoadingExample}" Foreground="#888" FontSize="12"/>
+
+                <StackPanel Spacing="12" IsVisible="{Binding ShowFeedback, Converter={StaticResource InvertConverter}}" Width="280">
+                    <TextBox Text="{Binding UserAnswer}" Watermark="Введите перевод" Padding="12,10" CornerRadius="12"
+                             HorizontalAlignment="Center" Width="280"/>
+                    <Button Command="{Binding CheckAnswerCommand}" Classes="PrimaryButton" Content="✓ Проверить"/>
                 </StackPanel>
-                
+
+                <TextBlock Text="🤖 AI анализирует..." IsVisible="{Binding IsLoading}" Foreground="#888" FontSize="14"/>
+
+                <Border IsVisible="{Binding ShowFeedback}" Background="#E8F5E9" CornerRadius="16" Padding="16">
+                    <TextBlock Text="{Binding Feedback}" TextWrapping="Wrap" Foreground="#2E7D32" FontSize="15"/>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" Spacing="16" IsVisible="{Binding ShowFeedback}" HorizontalAlignment="Center">
+                    <Button Command="{Binding NextWordCommand}" 
+                            IsVisible="{Binding IsLastWord, Converter={StaticResource InvertConverter}}" 
+                            Classes="PrimaryButton" Content="➡ Далее"/>
+                    <Button Command="{Binding EndLessonCommand}" 
+                            IsVisible="{Binding IsLastWord}" 
+                            Classes="SecondaryButton" Content="🏁 Завершить"/>
+                </StackPanel>
+
+            </StackPanel>
+        </Border>
+
+        <Border IsVisible="{Binding IsAIGenerating}" Background="#F3E5F5" CornerRadius="24" Padding="20" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel Spacing="12" HorizontalAlignment="Center">
+                <TextBlock Text="🤖 AI генерирует персональные слова..." FontSize="16" Foreground="#673AB7"/>
+                <ProgressBar IsIndeterminate="True" Height="4" Width="200" Foreground="#673AB7"/>
+                <TextBlock Text="Это займёт несколько секунд" FontSize="12" Foreground="#999" HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
         

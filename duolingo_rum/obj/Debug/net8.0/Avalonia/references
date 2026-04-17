@@ -23,28 +23,38 @@ C:\Users\rumia\.nuget\packages\avalonia.win32\11.3.8\lib\net8.0\Avalonia.Win32.A
 C:\Users\rumia\.nuget\packages\avalonia.win32\11.3.8\lib\net8.0\Avalonia.Win32.dll
 C:\Users\rumia\.nuget\packages\avalonia.x11\11.3.8\lib\net8.0\Avalonia.X11.dll
 C:\Users\rumia\.nuget\packages\bcrypt.net-next\4.1.0\lib\netstandard2.1\BCrypt.Net-Next.dll
+C:\Users\rumia\.nuget\packages\communitytoolkit.highperformance\8.4.0\lib\net8.0\CommunityToolkit.HighPerformance.dll
 C:\Users\rumia\.nuget\packages\dynamicdata\9.4.1\lib\net8.0\DynamicData.dll
 C:\Users\rumia\.nuget\packages\harfbuzzsharp\8.3.1.1\lib\net8.0\HarfBuzzSharp.dll
+C:\Users\rumia\.nuget\packages\llamasharp\0.26.0\lib\net8.0\LLamaSharp.dll
 C:\Users\rumia\.nuget\packages\microcom.runtime\0.11.0\lib\net5.0\MicroCom.Runtime.dll
+C:\Users\rumia\.nuget\packages\microsoft.bcl.asyncinterfaces\10.0.2\lib\netstandard2.1\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\Microsoft.CSharp.dll
 C:\Users\rumia\.nuget\packages\microsoft.entityframeworkcore.abstractions\8.0.25\lib\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
 C:\Users\rumia\.nuget\packages\microsoft.entityframeworkcore\8.0.25\lib\net8.0\Microsoft.EntityFrameworkCore.dll
 C:\Users\rumia\.nuget\packages\microsoft.entityframeworkcore.relational\8.0.25\lib\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\rumia\.nuget\packages\microsoft.extensions.ai.abstractions\9.10.1\lib\net8.0\Microsoft.Extensions.AI.Abstractions.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.caching.abstractions\8.0.0\lib\net8.0\Microsoft.Extensions.Caching.Abstractions.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.caching.memory\8.0.1\lib\net8.0\Microsoft.Extensions.Caching.Memory.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.configuration.abstractions\10.0.5\lib\net8.0\Microsoft.Extensions.Configuration.Abstractions.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.configuration\10.0.5\lib\net8.0\Microsoft.Extensions.Configuration.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.configuration.fileextensions\10.0.5\lib\net8.0\Microsoft.Extensions.Configuration.FileExtensions.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.configuration.json\10.0.5\lib\net8.0\Microsoft.Extensions.Configuration.Json.dll
-C:\Users\rumia\.nuget\packages\microsoft.extensions.dependencyinjection.abstractions\8.0.2\lib\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\rumia\.nuget\packages\microsoft.extensions.dependencyinjection.abstractions\10.0.3\lib\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.dependencyinjection\8.0.1\lib\net8.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\rumia\.nuget\packages\microsoft.extensions.diagnostics.abstractions\10.0.3\lib\net8.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.fileproviders.abstractions\10.0.5\lib\net8.0\Microsoft.Extensions.FileProviders.Abstractions.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.fileproviders.physical\10.0.5\lib\net8.0\Microsoft.Extensions.FileProviders.Physical.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.filesystemglobbing\10.0.5\lib\net8.0\Microsoft.Extensions.FileSystemGlobbing.dll
-C:\Users\rumia\.nuget\packages\microsoft.extensions.logging.abstractions\8.0.2\lib\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\rumia\.nuget\packages\microsoft.extensions.hosting.abstractions\10.0.3\lib\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll
+C:\Users\rumia\.nuget\packages\microsoft.extensions.logging.abstractions\10.0.3\lib\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.logging\8.0.1\lib\net8.0\Microsoft.Extensions.Logging.dll
-C:\Users\rumia\.nuget\packages\microsoft.extensions.options\8.0.2\lib\net8.0\Microsoft.Extensions.Options.dll
+C:\Users\rumia\.nuget\packages\microsoft.extensions.options\10.0.3\lib\net8.0\Microsoft.Extensions.Options.dll
 C:\Users\rumia\.nuget\packages\microsoft.extensions.primitives\10.0.5\lib\net8.0\Microsoft.Extensions.Primitives.dll
+C:\Users\rumia\.nuget\packages\microsoft.identitymodel.abstractions\8.17.0\lib\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\rumia\.nuget\packages\microsoft.identitymodel.jsonwebtokens\8.17.0\lib\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\rumia\.nuget\packages\microsoft.identitymodel.logging\8.17.0\lib\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\rumia\.nuget\packages\microsoft.identitymodel.tokens\8.17.0\lib\net8.0\Microsoft.IdentityModel.Tokens.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\Microsoft.VisualBasic.Core.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\Microsoft.VisualBasic.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\Microsoft.Win32.Primitives.dll
@@ -53,6 +63,7 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\mscorl
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\netstandard.dll
 C:\Users\rumia\.nuget\packages\npgsql\8.0.6\lib\net8.0\Npgsql.dll
 C:\Users\rumia\.nuget\packages\npgsql.entityframeworkcore.postgresql\8.0.11\lib\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\rumia\.nuget\packages\openai\2.10.0\lib\net8.0\OpenAI.dll
 C:\Users\rumia\.nuget\packages\reactiveui.avalonia\11.3.8\lib\net8.0\ReactiveUI.Avalonia.dll
 C:\Users\rumia\.nuget\packages\reactiveui\22.2.1\lib\net8.0\ReactiveUI.dll
 C:\Users\rumia\.nuget\packages\skiasharp\2.88.9\lib\net6.0\SkiaSharp.dll
@@ -62,6 +73,7 @@ C:\Users\rumia\.nuget\packages\splat\17.1.1\lib\net8.0\Splat.dll
 C:\Users\rumia\.nuget\packages\splat.logging\17.1.1\lib\net8.0\Splat.Logging.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.AppContext.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Buffers.dll
+C:\Users\rumia\.nuget\packages\system.clientmodel\1.10.0\lib\net8.0\System.ClientModel.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Collections.Concurrent.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Collections.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Collections.Immutable.dll
@@ -81,7 +93,7 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Data.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Diagnostics.Contracts.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Diagnostics.Debug.dll
-C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Diagnostics.DiagnosticSource.dll
+C:\Users\rumia\.nuget\packages\system.diagnostics.diagnosticsource\10.0.3\lib\net8.0\System.Diagnostics.DiagnosticSource.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Diagnostics.FileVersionInfo.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Diagnostics.Process.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Diagnostics.StackTrace.dll
@@ -98,6 +110,7 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Globalization.Calendars.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Globalization.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Globalization.Extensions.dll
+C:\Users\rumia\.nuget\packages\system.identitymodel.tokens.jwt\8.17.0\lib\net8.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.IO.Compression.Brotli.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.IO.Compression.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.IO.Compression.FileSystem.dll
@@ -118,6 +131,7 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Linq.Expressions.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Linq.Parallel.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Linq.Queryable.dll
+C:\Users\rumia\.nuget\packages\system.memory.data\10.0.3\lib\net8.0\System.Memory.Data.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Memory.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.Http.dll
@@ -131,6 +145,7 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.Quic.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.Requests.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.Security.dll
+C:\Users\rumia\.nuget\packages\system.net.serversentevents\10.0.2\lib\net8.0\System.Net.ServerSentEvents.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.ServicePoint.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.Sockets.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.WebClient.dll
@@ -139,6 +154,7 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.WebSockets.Client.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Net.WebSockets.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Numerics.dll
+C:\Users\rumia\.nuget\packages\system.numerics.tensors\9.0.9\lib\net8.0\System.Numerics.Tensors.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.Numerics.Vectors.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.21\ref\net8.0\System.ObjectModel.dll
 C:\Users\rumia\.nuget\packages\system.reactive\6.1.0\lib\net6.0\System.Reactive.dll

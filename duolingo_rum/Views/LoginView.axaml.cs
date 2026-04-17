@@ -1,3 +1,4 @@
+// Äכÿ ךאזהמדמ פאיכא:
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
@@ -8,6 +9,11 @@ namespace duolingo_rum.Views
         public LoginView()
         {
             InitializeComponent();
+        }
+
+        private void InitializeComponent()
+        {
+            AvaloniaXamlLoader.Load(this);
         }
     }
 }

@@ -30,6 +30,9 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 [C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/DashboardView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/LanguageSelectionView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/LessonView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
@@ -40,6 +43,9 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/ProfileView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/RegisterView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [C:/Users/rumia/source/repos/duolingo_rum/duolingo_rum/Views/StatisticsView.axaml]

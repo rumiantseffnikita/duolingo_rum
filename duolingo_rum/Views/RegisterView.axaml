@@ -1,0 +1,113 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:duolingo_rum.ViewModels"
+             x:Class="duolingo_rum.Views.RegisterView"
+             x:DataType="vm:RegisterViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        
+        <!-- Заголовок -->
+        <Border Grid.Row="0" Background="#673AB7" Padding="30,20">
+            <StackPanel HorizontalAlignment="Center" Spacing="5">
+                <TextBlock Text="🦉 LinguaAI" FontSize="32" FontWeight="Bold" 
+                           Foreground="White" HorizontalAlignment="Center"/>
+                <TextBlock Text="Начни своё путешествие в мир языков" FontSize="14" 
+                           Foreground="#E1BEE7" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Форма регистрации -->
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Margin="30,30,30,20" Spacing="15" VerticalAlignment="Center">
+                
+                <TextBlock Text="Создание аккаунта" FontSize="22" FontWeight="Bold" 
+                           HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                
+                <TextBox Text="{Binding Name}" 
+                         Watermark="👤 Имя"
+                         FontSize="14"
+                         Padding="12"
+                         CornerRadius="8"
+                         Width="280"
+                         HorizontalAlignment="Center"/>
+                
+                <TextBox Text="{Binding Email}" 
+                         Watermark="📧 Email"
+                         FontSize="14"
+                         Padding="12"
+                         CornerRadius="8"
+                         Width="280"
+                         HorizontalAlignment="Center"/>
+                
+                <TextBox Text="{Binding Password}" 
+                         Watermark="🔒 Пароль"
+                         FontSize="14"
+                         Padding="12"
+                         CornerRadius="8"
+                         PasswordChar="●"
+                         Width="280"
+                         HorizontalAlignment="Center"/>
+                
+                <TextBox Text="{Binding ConfirmPassword}" 
+                         Watermark="🔒 Подтвердите пароль"
+                         FontSize="14"
+                         Padding="12"
+                         CornerRadius="8"
+                         PasswordChar="●"
+                         Width="280"
+                         HorizontalAlignment="Center"/>
+                
+                <Button Command="{Binding RegisterCommand}"
+                        Background="#673AB7"
+                        Foreground="White"
+                        Height="50"
+                        Width="220"
+                        CornerRadius="10"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        IsEnabled="{Binding !IsLoading}"
+                        HorizontalAlignment="Center"
+                        HorizontalContentAlignment="Center">
+                    ✨ Зарегистрироваться
+                </Button>
+                
+                <TextBlock Text="{Binding Status}" 
+                           Foreground="Red"
+                           FontSize="12"
+                           HorizontalAlignment="Center"
+                           TextWrapping="Wrap"
+                           Width="280"/>
+                
+                <TextBlock Text="⏳ Создание аккаунта..." 
+                           IsVisible="{Binding IsLoading}"
+                           Foreground="Gray"
+                           FontSize="12"
+                           HorizontalAlignment="Center"/>
+                
+                <Border Height="1" Background="#E0E0E0" Margin="0,20,0,10" Width="280" HorizontalAlignment="Center"/>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+                    <TextBlock Text="Уже есть аккаунт?" Foreground="#666" FontSize="14"/>
+                    <Button Command="{Binding GoToLoginCommand}"
+                            Background="Transparent"
+                            Foreground="#673AB7"
+                            FontWeight="Bold"
+                            Padding="0"
+                            FontSize="14"
+                            HorizontalContentAlignment="Center">
+                        Войти
+                    </Button>
+                </StackPanel>
+                
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Нижний колонтитул -->
+        <Border Grid.Row="2" Background="#F5F5F5" Padding="10">
+            <TextBlock Text="© 2024 LinguaAI - Учись с удовольствием" 
+                       FontSize="11" Foreground="#999"
+                       HorizontalAlignment="Center"/>
+        </Border>
+        
+    </Grid>
+</UserControl>

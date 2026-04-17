@@ -1,4 +1,3 @@
-// ViewLocator.cs
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using duolingo_rum.ViewModels;
@@ -13,6 +12,8 @@ namespace duolingo_rum
             return data switch
             {
                 LoginViewModel vm => new LoginView { DataContext = vm },
+                RegisterViewModel vm => new RegisterView { DataContext = vm },
+                LanguageSelectionViewModel vm => new LanguageSelectionView { DataContext = vm },
                 DashboardViewModel vm => new DashboardView { DataContext = vm },
                 LessonViewModel vm => new LessonView { DataContext = vm },
                 StatisticsViewModel vm => new StatisticsView { DataContext = vm },
@@ -26,6 +27,8 @@ namespace duolingo_rum
         public bool Match(object? data)
         {
             return data is LoginViewModel
+                or RegisterViewModel
+                or LanguageSelectionViewModel
                 or DashboardViewModel
                 or LessonViewModel
                 or StatisticsViewModel
